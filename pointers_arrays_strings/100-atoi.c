@@ -13,23 +13,28 @@ int _atoi(char *s)
 	int started = 0;
 	int num = 0;
 
-	/* امشِ على السلسلة كاملة */
 	while (s[i] != '\0')
 	{
 		if (s[i] == '-')
 		{
 			if (!started)
-				sign = -sign;     /* كل '-' يقلب الإشارة قبل بداية الرقم */
+				sign = -sign;
 		}
 		else if (s[i] == '+')
 		{
-			/* نتجاهل '+' قبل بداية الرقم */
+			/* ignore '+' before number */
 		}
 		else if (s[i] >= '0' && s[i] <= '9')
 		{
 			started = 1;
-			num = num * 10 + (s[i] - '0');  /* كوّن القيمة */
+			num = num * 10 + (s[i] - '0');
 		}
 		else if (started)
 		{
-			/* إذا بدأنا نقرأ أرقام ثم وجدنا محرف غير رقمي،*
+			break;
+		}
+		i++;
+	}
+
+	return (sign * num);
+}
