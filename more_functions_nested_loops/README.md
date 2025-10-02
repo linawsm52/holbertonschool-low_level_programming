@@ -1,2 +1,2 @@
-hello my name is lina
-iam 20 years old
+# More functions and nested loops
+This project contains tasks about functions and nested loops in C.
