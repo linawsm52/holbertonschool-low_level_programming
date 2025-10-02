@@ -5,27 +5,27 @@
  * @dest: destination string
  * @src: source string
  *
- * Return: pointer to dest
+ * Return: pointer to the resulting string dest
  */
 char *_strcat(char *dest, char *src)
 {
-    int i = 0;
-    int j = 0;
+	int i, j;
 
-    /* move i to the end of dest */
-    while (dest[i] != '\0')
-    {
-        i++;
-    }
+	i = 0;
+	while (dest[i] != '\0')
+	{
+		i++;
+	}
 
-    /* copy src into dest starting at the end */
-    while (src[j] != '\0')
-    {
-        dest[i] = src[j];
-        i++;
-        j++;
-    }
+	j = 0;
+	while (src[j] != '\0')
+	{
+		dest[i] = src[j];
+		i++;
+		j++;
+	}
 
-    dest[i] = '\0'; /* add null terminator */
-    return (dest);
+	dest[i] = '\0';
+
+	return (dest);
 }
