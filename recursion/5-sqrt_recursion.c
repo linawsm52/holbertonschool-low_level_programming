@@ -1,18 +1,29 @@
 #include "main.h"
 
-/* helper: tries integers i = 0,1,2,... until i*i == n or passes it */
-static int sqrt_helper(int n, int i)
+/**
+ * sqrt_helper - recursively searches for the natural square root
+ *               by trying integers i = 1, 2, 3, ... until i*i passes n
+ * @n: number we want the root of
+ * @i: current candidate
+ *
+ * Return: i if i*i == n, -1 if n has no natural square root
+ */
+int sqrt_helper(int n, int i)
 {
-	if (i > n / i)          /* avoids overflow from i * i */
+	/* stop if i^2 already exceeded n (use division to avoid overflow) */
+	if (i > n / i)
 		return (-1);
-	if (i * i == n)
+
+	/* i*i == n  <=>  i == n / i  and  n % i == 0 (no multiplication) */
+	if (i == n / i && n % i == 0)
 		return (i);
+
 	return (sqrt_helper(n, i + 1));
 }
 
 /**
  * _sqrt_recursion - returns the natural square root of a number
- * @n: the number
+ * @n: number
  *
  * Return: natural square root of n; -1 if n has no natural square root
  */
@@ -20,5 +31,10 @@ int _sqrt_recursion(int n)
 {
 	if (n < 0)
 		return (-1);
-	return (sqrt_helper(n, 0));
+	if (n == 0)
+		return (0);
+	if (n == 1)
+		return (1);
+
+	return (sqrt_helper(n, 1));
 }
