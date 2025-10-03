@@ -3,8 +3,11 @@
 
 /**
  * free_grid - frees a 2D grid previously created by alloc_grid
- * @grid: pointer to rows
- * @height: number of rows
+ * @grid: pointer to an array of row pointers
+ * @height: number of rows in the grid
+ *
+ * Frees each row first, then frees the array of row pointers.
+ * Does nothing if @grid is NULL or @height is non-positive.
  */
 void free_grid(int **grid, int height)
 {
@@ -13,10 +16,10 @@ void free_grid(int **grid, int height)
     if (grid == NULL || height <= 0)
         return;
 
-    /* حرر الصفوف أولاً */
+    /* Free each row first */
     for (i = 0; i < height; i++)
         free(grid[i]);
 
-    /* بعدين حرر مصفوفة مؤشرات الصفوف */
+    /* Then free the array of row pointers */
     free(grid);
 }
