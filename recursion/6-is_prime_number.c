@@ -1,13 +1,19 @@
 #include "main.h"
 
-/* helper: checks divisors recursively up to sqrt(n) */
-static int prime_helper(int n, int d)
+/**
+ * prime_check - recursive helper to test divisors
+ * @n: number to test
+ * @d: current divisor
+ *
+ * Return: 1 if prime so far, 0 if composite
+ */
+int prime_check(int n, int d)
 {
-	if (d > n / d)          /* equivalent to d * d > n without overflow */
+	if (d > n / d)          /* نفس معنى d*d > n بدون خطر overflow */
 		return (1);
 	if (n % d == 0)
 		return (0);
-	return (prime_helper(n, d + 1));
+	return (prime_check(n, d + 1));
 }
 
 /**
@@ -20,10 +26,6 @@ int is_prime_number(int n)
 {
 	if (n <= 1)
 		return (0);
-	if (n == 2)
-		return (1);
-	if (n % 2 == 0)
-		return (0);
 
-	return (prime_helper(n, 3));
+	return (prime_check(n, 2));
 }
