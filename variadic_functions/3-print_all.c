@@ -3,19 +3,22 @@
 #include <stdarg.h>
 
 /**
- * print_all - prints anything, depending on the format
+ * print_all - prints anything according to a format string
  * @format: list of types of arguments passed to the function
  *
  * c: char
  * i: integer
  * f: float
  * s: char * (if NULL, print (nil))
+ *
+ * Return: nothing
  */
 void print_all(const char * const format, ...)
 {
 	va_list args;
 	unsigned int i = 0;
-	char *str, *sep = "";
+	char *str;
+	char *sep = "";
 
 	va_start(args, format);
 
@@ -30,7 +33,8 @@ void print_all(const char * const format, ...)
 				printf("%s%d", sep, va_arg(args, int));
 				break;
 			case 'f':
-				printf("%s%f", sep, va_arg(args, double));
+				/* use %g to avoid trailing zeros differences */
+				printf("%s%g", sep, va_arg(args, double));
 				break;
 			case 's':
 				str = va_arg(args, char *);
