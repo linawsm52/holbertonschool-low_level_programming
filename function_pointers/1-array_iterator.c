@@ -2,10 +2,11 @@
 #include <stddef.h>
 
 /**
- * array_iterator - executes a function on each element of an array
+ * array_iterator - executes a function given as a parameter
+ *                  on each element of an array
  * @array: the array
- * @size: size of the array
- * @action: pointer to function to use
+ * @size: the size of the array
+ * @action: pointer to the function to use
  *
  * Return: nothing
  */
