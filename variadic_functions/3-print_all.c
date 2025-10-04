@@ -33,8 +33,8 @@ void print_all(const char * const format, ...)
 				printf("%s%d", sep, va_arg(args, int));
 				break;
 			case 'f':
-				/* use %g to avoid trailing zeros differences */
-				printf("%s%g", sep, va_arg(args, double));
+				/* %f -> six decimals as checker expects */
+				printf("%s%f", sep, va_arg(args, double));
 				break;
 			case 's':
 				str = va_arg(args, char *);
