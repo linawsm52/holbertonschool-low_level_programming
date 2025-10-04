@@ -7,8 +7,8 @@
  * @s2: second string
  * @n: number of bytes to copy from s2
  *
- * Return: pointer to newly allocated space in memory
- *         NULL if it fails
+ * Return: pointer to newly allocated space in memory containing s1,
+ *         then the first n bytes of s2, null-terminated; or NULL on failure.
  */
 char *string_nconcat(char *s1, char *s2, unsigned int n)
 {
@@ -26,4 +26,17 @@ char *string_nconcat(char *s1, char *s2, unsigned int n)
 		len2++;
 
 	if (n >= len2)
-		n = l
+		n = len2;
+
+	ptr = malloc(sizeof(char) * (len1 + n + 1));
+	if (ptr == NULL)
+		return (NULL);
+
+	for (i = 0; i < len1; i++)
+		ptr[i] = s1[i];
+	for (j = 0; j < n; j++)
+		ptr[i + j] = s2[j];
+
+	ptr[i + j] = '\0';
+	return (ptr);
+}
