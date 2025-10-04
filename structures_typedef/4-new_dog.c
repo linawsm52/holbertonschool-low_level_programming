@@ -1,49 +1,88 @@
 #include "dog.h"
 #include <stdlib.h>
-#include <string.h>
+
+/* Helpers without using <string.h> */
 
 /**
- * new_dog - creates a new dog
+ * _strlen - returns the length of a string
+ * @s: string
+ * Return: length (number of characters before '\0')
+ */
+static int _strlen(char *s)
+{
+	int i = 0;
+
+	if (s == NULL)
+		return (0);
+
+	while (s[i] != '\0')
+		i++;
+
+	return (i);
+}
+
+/**
+ * _strcpy - copies a string from src to dest (including '\0')
+ * @dest: destination buffer
+ * @src: source string
+ * Return: pointer to dest
+ */
+static char *_strcpy(char *dest, char *src)
+{
+	int i = 0;
+
+	if (dest == NULL || src == NULL)
+		return (dest);
+
+	while (src[i] != '\0')
+	{
+		dest[i] = src[i];
+		i++;
+	}
+	dest[i] = '\0';
+	return (dest);
+}
+
+/**
+ * new_dog - creates a new dog (makes copies of name and owner)
  * @name: dog's name
  * @age: dog's age
  * @owner: dog's owner
  *
- * Return: pointer to new dog, or NULL if fail
+ * Return: pointer to the new dog_t, or NULL if any allocation fails
  */
 dog_t *new_dog(char *name, float age, char *owner)
 {
-	dog_t *new;
-	char *new_name, *new_owner;
+	dog_t *nd;
+	int len_name, len_owner;
 
 	if (name == NULL || owner == NULL)
 		return (NULL);
 
-	new = malloc(sizeof(dog_t));
-	if (new == NULL)
+	nd = malloc(sizeof(dog_t));
+	if (nd == NULL)
 		return (NULL);
 
-	/* allocate and copy name */
-	new_name = malloc(strlen(name) + 1);
-	if (new_name == NULL)
+	len_name = _strlen(name);
+	len_owner = _strlen(owner);
+
+	nd->name = malloc(len_name + 1);
+	if (nd->name == NULL)
 	{
-		free(new);
+		free(nd);
 		return (NULL);
 	}
-	strcpy(new_name, name);
+	_strcpy(nd->name, name);
 
-	/* allocate and copy owner */
-	new_owner = malloc(strlen(owner) + 1);
-	if (new_owner == NULL)
+	nd->owner = malloc(len_owner + 1);
+	if (nd->owner == NULL)
 	{
-		free(new_name);
-		free(new);
+		free(nd->name);
+		free(nd);
 		return (NULL);
 	}
-	strcpy(new_owner, owner);
+	_strcpy(nd->owner, owner);
 
-	new->name = new_name;
-	new->age = age;
-	new->owner = new_owner;
-
-	return (new);
+	nd->age = age;
+	return (nd);
 }
