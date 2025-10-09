@@ -20,5 +20,6 @@ typedef struct list_s
 
 /* Prototypes used across the project (لا بأس تبقينها أو تحذفين غير اللازمة) */
 size_t list_len(const list_t *h);
+list_t *add_node(list_t **head, const char *str);
 
 #endif /* LISTS_H */
