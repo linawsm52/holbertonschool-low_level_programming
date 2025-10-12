@@ -7,8 +7,8 @@
 #define BUFFER_SIZE 1024
 
 /**
- * error_exit - print error message to STDERR and exit with given code
- * @code: exit status
+ * error_exit - prints an error message to STDERR and exits with a code
+ * @code: exit code
  * @message: error message format
  * @arg: string argument for message
  */
@@ -27,7 +27,7 @@ void error_exit(int code, const char *message, const char *arg)
  */
 int main(int ac, char **av)
 {
-	int fd_from, fd_to, cl;
+	int fd_from, fd_to;
 	ssize_t r, w;
 	char buf[BUFFER_SIZE];
 
@@ -45,7 +45,8 @@ int main(int ac, char **av)
 		error_exit(99, "Error: Can't write to %s\n", av[2]);
 	}
 
-	while ((r = read(fd_from, buf, BUFFER_SIZE)) > 0)
+	r = read(fd_from, buf, BUFFER_SIZE);
+	while (r > 0)
 	{
 		w = write(fd_to, buf, r);
 		if (w == -1 || w != r)
@@ -54,8 +55,8 @@ int main(int ac, char **av)
 			close(fd_to);
 			error_exit(99, "Error: Can't write to %s\n", av[2]);
 		}
+		r = read(fd_from, buf, BUFFER_SIZE);
 	}
-
 	if (r == -1)
 	{
 		close(fd_from);
@@ -63,12 +64,9 @@ int main(int ac, char **av)
 		error_exit(98, "Error: Can't read from file %s\n", av[1]);
 	}
 
-	cl = close(fd_from);
-	if (cl == -1)
+	if (close(fd_from) == -1)
 		error_exit(100, "Error: Can't close fd %d\n", av[1]);
-
-	cl = close(fd_to);
-	if (cl == -1)
+	if (close(fd_to) == -1)
 		error_exit(100, "Error: Can't close fd %d\n", av[2]);
 
 	return (0);
