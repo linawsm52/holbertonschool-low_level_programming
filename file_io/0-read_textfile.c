@@ -6,7 +6,7 @@
  * @letters: number of bytes to read and print
  *
  * Return: the actual number of bytes printed,
- *         or 0 on any error (open/read/write failure, NULL filename).
+ * or 0 on any error (open/read/write failure, NULL filename)
  */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
@@ -29,18 +29,17 @@ ssize_t read_textfile(const char *filename, size_t letters)
 	}
 
 	nread = read(fd, buf, letters);
-	if (nread <= 0) /* read error or empty file */
+	if (nread <= 0)
 	{
 		free(buf);
 		close(fd);
 		return (0);
 	}
 
-	/* write may write fewer bytes; loop until all nread bytes are written */
 	while (total < nread)
 	{
 		nwritten = write(STDOUT_FILENO, buf + total, nread - total);
-		if (nwritten <= 0) /* write error */
+		if (nwritten <= 0)
 		{
 			free(buf);
 			close(fd);
@@ -50,6 +49,7 @@ ssize_t read_textfile(const char *filename, size_t letters)
 	}
 
 	free(buf);
+
 	if (close(fd) == -1)
 		return (0);
 
