@@ -1,54 +1,62 @@
 #include "main.h"
 
 /**
- * read_textfile - reads a text file and prints it to POSIX standard output
- * @filename: path to the file to read
- * @letters: number of bytes to read and print
+ * read_and_print - helper to read and print from fd
+ * @fd: file descriptor
+ * @letters: number of bytes to read
  *
- * Return: the actual number of bytes printed,
- * or 0 on any error (open/read/write failure, NULL filename)
+ * Return: number of bytes printed, or 0 on failure
  */
-ssize_t read_textfile(const char *filename, size_t letters)
+static ssize_t read_and_print(int fd, size_t letters)
 {
-	int fd;
-	ssize_t nread, nwritten, total = 0;
 	char *buf;
-
-	if (filename == NULL || letters == 0)
-		return (0);
+	ssize_t nread, nw, total = 0;
 
 	buf = malloc(letters);
 	if (buf == NULL)
 		return (0);
 
-	fd = open(filename, O_RDONLY);
-	if (fd == -1)
-	{
-		free(buf);
-		return (0);
-	}
-
 	nread = read(fd, buf, letters);
 	if (nread <= 0)
 	{
 		free(buf);
-		close(fd);
 		return (0);
 	}
 
 	while (total < nread)
 	{
-		nwritten = write(STDOUT_FILENO, buf + total, nread - total);
-		if (nwritten <= 0)
+		nw = write(STDOUT_FILENO, buf + total, nread - total);
+		if (nw <= 0)
 		{
 			free(buf);
-			close(fd);
 			return (0);
 		}
-		total += nwritten;
+		total += nw;
 	}
-
 	free(buf);
+	return (total);
+}
+
+/**
+ * read_textfile - reads a text file and prints to STDOUT
+ * @filename: path to the file
+ * @letters: number of bytes to read and print
+ *
+ * Return: number of bytes printed, or 0 on failure
+ */
+ssize_t read_textfile(const char *filename, size_t letters)
+{
+	int fd;
+	ssize_t total;
+
+	if (filename == NULL || letters == 0)
+		return (0);
+
+	fd = open(filename, O_RDONLY);
+	if (fd == -1)
+		return (0);
+
+	total = read_and_print(fd, letters);
 
 	if (close(fd) == -1)
 		return (0);
