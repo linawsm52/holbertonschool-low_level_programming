@@ -7,73 +7,61 @@
 #define BUFFER_SIZE 1024
 
 /**
- * die_usage - print usage and exit(97)
+ * error_exit_msg - print string-based error to STDERR and exit with code
+ * @code: exit code
+ * @fmt: printf-like format with %s
+ * @arg: string to print with the format
  */
-static void die_usage(void)
+static void error_exit_msg(int code, const char *fmt, const char *arg)
 {
-	dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
-	exit(97);
+	dprintf(STDERR_FILENO, fmt, arg);
+	exit(code);
 }
 
 /**
- * die_read - print read error for a file and exit(98)
- * @file: source file name
+ * error_exit_fd - print fd-based error to STDERR and exit with code
+ * @code: exit code
+ * @fmt: printf-like format with %d
+ * @fd: file descriptor to print
  */
-static void die_read(const char *file)
+static void error_exit_fd(int code, const char *fmt, int fd)
 {
-	dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", file);
-	exit(98);
+	dprintf(STDERR_FILENO, fmt, fd);
+	exit(code);
 }
 
 /**
- * die_write - print write error for a file and exit(99)
- * @file: destination file name
- */
-static void die_write(const char *file)
-{
-	dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file);
-	exit(99);
-}
-
-/**
- * die_close - print close error for a file descriptor and exit(100)
- * @fd: file descriptor
- */
-static void die_close(int fd)
-{
-	dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
-	exit(100);
-}
-
-/**
- * safe_close - close wrapper that exits on failure
- * @fd: file descriptor to close
+ * safe_close - close wrapper that exits with code 100 on error
+ * @fd: descriptor to close
  */
 static void safe_close(int fd)
 {
-	if (close(fd) == -1)
-		die_close(fd);
+	int rc;
+
+	rc = close(fd);
+
+	if (rc == -1)
+		error_exit_fd(100, "Error: Can't close fd %d\n", fd);
 }
 
 /**
- * copy_fd - copy bytes from fd_from to fd_to using a buffer
+ * copy_fd - copy bytes from fd_from to fd_to
  * @fd_from: source descriptor
  * @fd_to: destination descriptor
  * @from: source file name (for messages)
  * @to: destination file name (for messages)
  */
-static void copy_fd(int fd_from, int fd_to,
-		    const char *from, const char *to)
+static void copy_fd(int fd_from, int fd_to, const char *from, const char *to)
 {
 	ssize_t r, w, done;
 	char buf[BUFFER_SIZE];
 
 	for (;;)
 	{
-		/* check read result immediately */
+		/* always check read() immediately */
 		r = read(fd_from, buf, BUFFER_SIZE);
 		if (r == -1)
-			die_read(from);
+			error_exit_msg(98, "Error: Can't read from file %s\n", from);
 		if (r == 0) /* EOF */
 			break;
 
@@ -82,16 +70,16 @@ static void copy_fd(int fd_from, int fd_to,
 		{
 			w = write(fd_to, buf + done, r - done);
 			if (w == -1)
-				die_write(to);
+				error_exit_msg(99, "Error: Can't write to %s\n", to);
 			done += w;
 		}
 	}
 }
 
 /**
- * main - copies the content of a file to another file
+ * main - copy the content of a file to another file
  * @ac: argument count
- * @av: argument vector: av[1] = file_from, av[2] = file_to
+ * @av: argument vector (av[1] = file_from, av[2] = file_to)
  *
  * Return: 0 on success
  */
@@ -102,32 +90,32 @@ int main(int ac, char **av)
 	char buf[BUFFER_SIZE];
 
 	if (ac != 3)
-		die_usage();
+		error_exit_msg(97, "Usage: cp file_from file_to\n", "");
 
 	fd_from = open(av[1], O_RDONLY);
 	if (fd_from == -1)
-		die_read(av[1]);
+		error_exit_msg(98, "Error: Can't read from file %s\n", av[1]);
 
-	/* ----- read FIRST, so read-error wins over any write error ----- */
+	/* read first so read-error wins over write-error in the checker */
 	first_read = read(fd_from, buf, BUFFER_SIZE);
 	if (first_read == -1)
 	{
 		safe_close(fd_from);
-		die_read(av[1]);
+		error_exit_msg(98, "Error: Can't read from file %s\n", av[1]);
 	}
 
-	/* now open destination */
 	fd_to = open(av[2], O_WRONLY | O_CREAT | O_TRUNC, 0664);
 	if (fd_to == -1)
 	{
 		safe_close(fd_from);
-		die_write(av[2]);
+		error_exit_msg(99, "Error: Can't write to %s\n", av[2]);
 	}
 
-	/* write the first chunk (if any) then continue with copy loop */
+	/* write the first chunk if any, then continue normally */
 	if (first_read > 0)
 	{
 		ssize_t done = 0, w;
+
 		while (done < first_read)
 		{
 			w = write(fd_to, buf + done, first_read - done);
@@ -135,12 +123,12 @@ int main(int ac, char **av)
 			{
 				safe_close(fd_from);
 				safe_close(fd_to);
-				die_write(av[2]);
+				error_exit_msg(99, "Error: Can't write to %s\n", av[2]);
 			}
 			done += w;
 		}
 	}
-	/* continue copying; copy_fd re-checks read() each time */
+
 	copy_fd(fd_from, fd_to, av[1], av[2]);
 
 	safe_close(fd_from);
