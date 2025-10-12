@@ -7,10 +7,10 @@
 #define BUFFER_SIZE 1024
 
 /**
- * error_exit - print to STDERR and exit with a specific code
- * @code: exit status code
- * @fmt: format string to print
- * @arg: string argument used in the format (may be "")
+ * error_exit - print message to STDERR and exit with code
+ * @code: exit status
+ * @fmt: printf-like format string
+ * @arg: string argument used in the message (may be "")
  */
 static void error_exit(int code, const char *fmt, const char *arg)
 {
@@ -23,7 +23,7 @@ static void error_exit(int code, const char *fmt, const char *arg)
  * @ac: argument count
  * @av: argument vector (av[1] = file_from, av[2] = file_to)
  *
- * Return: 0 on success; otherwise exits with:
+ * Return: 0 on success, otherwise exits with codes:
  * 97 (usage), 98 (read error), 99 (write/create error), 100 (close error)
  */
 int main(int ac, char **av)
@@ -46,7 +46,7 @@ int main(int ac, char **av)
 		error_exit(99, "Error: Can't write to %s\n", av[2]);
 	}
 
-	/* Read/Write loop: always check read() immediately */
+	/* Always check read result immediately before any write */
 	for (;;)
 	{
 		r = read(fd_from, buf, BUFFER_SIZE);
