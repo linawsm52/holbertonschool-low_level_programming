@@ -5,67 +5,59 @@
  */
 
 #include <elf.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /**
- * _putchar - writes a character to stdout
- * @c: character to print
- * Return: 1 on success, -1 on error
- */
-int _putchar(char c)
-{
-	return (write(STDOUT_FILENO, &c, 1));
-}
-
-/**
- * print_error - prints error message and exits
- * @msg: message to print
+ * print_error - prints an error message to stderr and exits
+ * @msg: the message to print
  */
 void print_error(char *msg)
 {
-	int i;
+	int i = 0;
 
-	for (i = 0; msg[i]; i++)
+	while (msg[i])
+	{
 		write(STDERR_FILENO, &msg[i], 1);
+		i++;
+	}
 	write(STDERR_FILENO, "\n", 1);
 	_exit(98);
 }
 
 /**
- * print_magic - prints ELF magic numbers
- * @e_ident: pointer to array
- */
-void print_magic(unsigned char *e_ident)
-{
-	int i;
-	char c;
-
-	write(STDOUT_FILENO, "  Magic:   ", 11);
-	for (i = 0; i < EI_NIDENT; i++)
-	{
-		c = "0123456789abcdef"[e_ident[i] >> 4];
-		_putchar(c);
-		c = "0123456789abcdef"[e_ident[i] & 0x0F];
-		_putchar(c);
-		if (i < EI_NIDENT - 1)
-			_putchar(' ');
-	}
-	_putchar('\n');
-}
-
-/**
- * check_elf - verifies ELF file
- * @e_ident: pointer to magic numbers
+ * check_elf - checks if a file is an ELF file
+ * @e_ident: pointer to the ELF magic numbers
  */
 void check_elf(unsigned char *e_ident)
 {
 	if (e_ident[0] != 0x7f || e_ident[1] != 'E' ||
 	    e_ident[2] != 'L' || e_ident[3] != 'F')
 		print_error("Error: Not an ELF file");
+}
+
+/**
+ * print_magic - prints ELF magic bytes
+ * @e_ident: pointer to ELF header identification
+ */
+void print_magic(unsigned char *e_ident)
+{
+	int i;
+	char hex[3];
+	char *hexset = "0123456789abcdef";
+
+	write(STDOUT_FILENO, "  Magic:   ", 11);
+	for (i = 0; i < EI_NIDENT; i++)
+	{
+		hex[0] = hexset[e_ident[i] >> 4];
+		hex[1] = hexset[e_ident[i] & 0x0F];
+		write(STDOUT_FILENO, hex, 2);
+		if (i < EI_NIDENT - 1)
+			write(STDOUT_FILENO, " ", 1);
+	}
+	write(STDOUT_FILENO, "\n", 1);
 }
 
 /**
@@ -77,8 +69,8 @@ void check_elf(unsigned char *e_ident)
 int main(int argc, char *argv[])
 {
 	int fd;
-	ssize_t r;
 	Elf64_Ehdr header;
+	ssize_t r;
 
 	if (argc != 2)
 		print_error("Usage: elf_header elf_filename");
