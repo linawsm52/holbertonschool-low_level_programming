@@ -10,19 +10,34 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* ---------- tiny I/O helpers (no stdio) ---------- */
+/* ========================== Tiny I/O helpers ========================== */
 
+/**
+ * wstr - write a NUL-terminated string to a file descriptor
+ * @fd: destination file descriptor
+ * @s:  C-string to write
+ */
 static void wstr(int fd, const char *s)
 {
 	while (*s)
 		write(fd, s++, 1);
 }
 
+/**
+ * wch - write a single character to a file descriptor
+ * @fd: destination file descriptor
+ * @c:  character to write
+ */
 static void wch(int fd, char c)
 {
 	write(fd, &c, 1);
 }
 
+/**
+ * wdec - write an unsigned integer in decimal to a file descriptor
+ * @fd: destination file descriptor
+ * @v:  value to print
+ */
 static void wdec(int fd, unsigned int v)
 {
 	char buf[12];
@@ -42,6 +57,11 @@ static void wdec(int fd, unsigned int v)
 		wch(fd, buf[i]);
 }
 
+/**
+ * whex_u64 - write an unsigned long value in lowercase hexadecimal
+ * @fd: destination file descriptor
+ * @v:  value to print
+ */
 static void whex_u64(int fd, unsigned long v)
 {
 	char map[] = "0123456789abcdef";
@@ -62,22 +82,35 @@ static void whex_u64(int fd, unsigned long v)
 		wch(fd, buf[j]);
 }
 
+/**
+ * die - print an error message to stderr and exit with code 98
+ * @msg: error message
+ */
 static void die(const char *msg)
 {
 	wstr(STDERR_FILENO, "Error: ");
 	wstr(STDERR_FILENO, (char *)msg);
 	wch(STDERR_FILENO, '\n');
-	/* لا نستخدم exit من stdlib؛ نضمن كود الخروج 98 */
 	_exit(98);
 }
 
-/* ---------- endianness helpers ---------- */
+/* ============================ Endianness ============================= */
 
+/**
+ * bswap16 - byte-swap a 16-bit unsigned value
+ * @x: value
+ * Return: swapped value
+ */
 static unsigned short bswap16(unsigned short x)
 {
-	return (unsigned short)((x >> 8) | (x << 8));
+	return ((x >> 8) | (x << 8));
 }
 
+/**
+ * bswap32 - byte-swap a 32-bit unsigned value
+ * @x: value
+ * Return: swapped value
+ */
 static unsigned int bswap32(unsigned int x)
 {
 	return ((x & 0x000000FFU) << 24) |
@@ -86,6 +119,11 @@ static unsigned int bswap32(unsigned int x)
 	       ((x & 0xFF000000U) >> 24);
 }
 
+/**
+ * bswap64 - byte-swap a 64-bit unsigned value
+ * @x: value
+ * Return: swapped value
+ */
 static unsigned long bswap64(unsigned long x)
 {
 	return ((x & 0x00000000000000FFUL) << 56) |
@@ -98,16 +136,22 @@ static unsigned long bswap64(unsigned long x)
 	       ((x & 0xFF00000000000000UL) >> 56);
 }
 
-/* ---------- field printers ---------- */
+/* ============================ Printers =============================== */
 
+/**
+ * print_magic - print the magic bytes
+ * @e: pointer to ELF identification array
+ */
 static void print_magic(const unsigned char *e)
 {
 	int i;
+
 	wstr(STDOUT_FILENO, "  Magic:   ");
 	for (i = 0; i < EI_NIDENT; i++)
 	{
 		char hi = "0123456789abcdef"[e[i] >> 4];
 		char lo = "0123456789abcdef"[e[i] & 0xF];
+
 		wch(STDOUT_FILENO, hi);
 		wch(STDOUT_FILENO, lo);
 		if (i != EI_NIDENT - 1)
@@ -116,6 +160,10 @@ static void print_magic(const unsigned char *e)
 	wch(STDOUT_FILENO, '\n');
 }
 
+/**
+ * print_class - print the ELF class (ELF32/ELF64)
+ * @e: pointer to ELF identification array
+ */
 static void print_class(const unsigned char *e)
 {
 	wstr(STDOUT_FILENO, "  Class:                             ");
@@ -127,6 +175,10 @@ static void print_class(const unsigned char *e)
 		wstr(STDOUT_FILENO, "Invalid class\n");
 }
 
+/**
+ * print_data - print the data encoding (endianness)
+ * @e: pointer to ELF identification array
+ */
 static void print_data(const unsigned char *e)
 {
 	wstr(STDOUT_FILENO, "  Data:                              ");
@@ -138,6 +190,10 @@ static void print_data(const unsigned char *e)
 		wstr(STDOUT_FILENO, "Invalid data encoding\n");
 }
 
+/**
+ * print_version - print the ELF version
+ * @e: pointer to ELF identification array
+ */
 static void print_version(const unsigned char *e)
 {
 	wstr(STDOUT_FILENO, "  Version:                           ");
@@ -147,22 +203,52 @@ static void print_version(const unsigned char *e)
 	wch(STDOUT_FILENO, '\n');
 }
 
+/**
+ * print_osabi - print the OS/ABI string
+ * @e: pointer to ELF identification array
+ */
 static void print_osabi(const unsigned char *e)
 {
 	wstr(STDOUT_FILENO, "  OS/ABI:                            ");
 	switch (e[EI_OSABI])
 	{
-	case ELFOSABI_SYSV:      wstr(STDOUT_FILENO, "UNIX - System V\n"); break;
-	case ELFOSABI_NETBSD:    wstr(STDOUT_FILENO, "UNIX - NetBSD\n"); break;
-	case ELFOSABI_SOLARIS:   wstr(STDOUT_FILENO, "UNIX - Solaris\n"); break;
-	case ELFOSABI_GNU:       wstr(STDOUT_FILENO, "UNIX - GNU\n"); break;
-	case ELFOSABI_FREEBSD:   wstr(STDOUT_FILENO, "UNIX - FreeBSD\n"); break;
-	case ELFOSABI_OPENBSD:   wstr(STDOUT_FILENO, "UNIX - OpenBSD\n"); break;
-	case ELFOSABI_AIX:       wstr(STDOUT_FILENO, "UNIX - AIX\n"); break;
-	case ELFOSABI_IRIX:      wstr(STDOUT_FILENO, "UNIX - IRIX\n"); break;
-	case ELFOSABI_HPUX:      wstr(STDOUT_FILENO, "UNIX - HP-UX\n"); break;
-	case ELFOSABI_TRU64:     wstr(STDOUT_FILENO, "UNIX - TRU64\n"); break;
-	case ELFOSABI_ARM:       wstr(STDOUT_FILENO, "ARM\n"); break;
+	case ELFOSABI_SYSV:
+		wstr(STDOUT_FILENO, "UNIX - System V\n");
+		break;
+	case ELFOSABI_NETBSD:
+		wstr(STDOUT_FILENO, "UNIX - NetBSD\n");
+		break;
+	case ELFOSABI_SOLARIS:
+		wstr(STDOUT_FILENO, "UNIX - Solaris\n");
+		break;
+	case ELFOSABI_GNU:
+		wstr(STDOUT_FILENO, "UNIX - GNU\n");
+		break;
+	case ELFOSABI_FREEBSD:
+		wstr(STDOUT_FILENO, "UNIX - FreeBSD\n");
+		break;
+	case ELFOSABI_OPENBSD:
+		wstr(STDOUT_FILENO, "UNIX - OpenBSD\n");
+		break;
+	case ELFOSABI_AIX:
+		wstr(STDOUT_FILENO, "UNIX - AIX\n");
+		break;
+	case ELFOSABI_IRIX:
+		wstr(STDOUT_FILENO, "UNIX - IRIX\n");
+		break;
+	case ELFOSABI_HPUX:
+		wstr(STDOUT_FILENO, "UNIX - HP-UX\n");
+		break;
+	case ELFOSABI_TRU64:
+		wstr(STDOUT_FILENO, "UNIX - TRU64\n");
+		break;
+	case ELFOSABI_ARM:
+		wstr(STDOUT_FILENO, "ARM\n");
+		break;
+	/* Sortix (value 103) */
+	case 103:
+		wstr(STDOUT_FILENO, "UNIX - Sortix\n");
+		break;
 	default:
 		wstr(STDOUT_FILENO, "<unknown: ");
 		wdec(STDOUT_FILENO, (unsigned int)e[EI_OSABI]);
@@ -171,6 +257,10 @@ static void print_osabi(const unsigned char *e)
 	}
 }
 
+/**
+ * print_abiversion - print the ABI version value
+ * @e: pointer to ELF identification array
+ */
 static void print_abiversion(const unsigned char *e)
 {
 	wstr(STDOUT_FILENO, "  ABI Version:                       ");
@@ -178,6 +268,11 @@ static void print_abiversion(const unsigned char *e)
 	wch(STDOUT_FILENO, '\n');
 }
 
+/**
+ * print_type - print the file type (ET_*)
+ * @t:   e_type field
+ * @msb: non-zero if file is big-endian
+ */
 static void print_type(unsigned short t, int msb)
 {
 	if (msb)
@@ -186,11 +281,21 @@ static void print_type(unsigned short t, int msb)
 	wstr(STDOUT_FILENO, "  Type:                              ");
 	switch (t)
 	{
-	case ET_NONE: wstr(STDOUT_FILENO, "NONE (None)\n"); break;
-	case ET_REL:  wstr(STDOUT_FILENO, "REL (Relocatable file)\n"); break;
-	case ET_EXEC: wstr(STDOUT_FILENO, "EXEC (Executable file)\n"); break;
-	case ET_DYN:  wstr(STDOUT_FILENO, "DYN (Shared object file)\n"); break;
-	case ET_CORE: wstr(STDOUT_FILENO, "CORE (Core file)\n"); break;
+	case ET_NONE:
+		wstr(STDOUT_FILENO, "NONE (None)\n");
+		break;
+	case ET_REL:
+		wstr(STDOUT_FILENO, "REL (Relocatable file)\n");
+		break;
+	case ET_EXEC:
+		wstr(STDOUT_FILENO, "EXEC (Executable file)\n");
+		break;
+	case ET_DYN:
+		wstr(STDOUT_FILENO, "DYN (Shared object file)\n");
+		break;
+	case ET_CORE:
+		wstr(STDOUT_FILENO, "CORE (Core file)\n");
+		break;
 	default:
 		wstr(STDOUT_FILENO, "<unknown: 0x");
 		whex_u64(STDOUT_FILENO, (unsigned long)t);
@@ -199,6 +304,11 @@ static void print_type(unsigned short t, int msb)
 	}
 }
 
+/**
+ * print_entry_u32 - print 32-bit entry point, respecting endianness
+ * @e:   32-bit entry address
+ * @msb: non-zero if file is big-endian
+ */
 static void print_entry_u32(unsigned int e, int msb)
 {
 	if (msb)
@@ -209,6 +319,11 @@ static void print_entry_u32(unsigned int e, int msb)
 	wch(STDOUT_FILENO, '\n');
 }
 
+/**
+ * print_entry_u64 - print 64-bit entry point, respecting endianness
+ * @e:   64-bit entry address
+ * @msb: non-zero if file is big-endian
+ */
 static void print_entry_u64(unsigned long e, int msb)
 {
 	if (msb)
@@ -219,8 +334,15 @@ static void print_entry_u64(unsigned long e, int msb)
 	wch(STDOUT_FILENO, '\n');
 }
 
-/* ---------- main ---------- */
+/* =============================== main ================================ */
 
+/**
+ * main - display selected information from an ELF header
+ * @argc: argument count
+ * @argv: argument vector (expects a single filename)
+ *
+ * Return: 0 on success; exits with status 98 on any error
+ */
 int main(int argc, char **argv)
 {
 	int fd, msb;
@@ -234,7 +356,7 @@ int main(int argc, char **argv)
 	if (fd == -1)
 		die("Can't open file");
 
-	/* اقرأ e_ident أولاً للتحقق وتحديد الصنف/الاندينس */
+	/* Read e_ident first to validate ELF and determine class/endianness */
 	n = read(fd, ident, EI_NIDENT);
 	if (n != EI_NIDENT)
 	{
@@ -242,7 +364,8 @@ int main(int argc, char **argv)
 		die("Can't read ELF header");
 	}
 
-	if (!(ident[0] == 0x7f && ident[1] == 'E' && ident[2] == 'L' && ident[3] == 'F'))
+	if (!(ident[0] == 0x7f && ident[1] == 'E' &&
+	      ident[2] == 'L' && ident[3] == 'F'))
 	{
 		close(fd);
 		die("Not an ELF file");
@@ -258,7 +381,7 @@ int main(int argc, char **argv)
 	print_osabi(ident);
 	print_abiversion(ident);
 
-	/* اقرأ بقية الترويسة حسب الـ class */
+	/* Read the remaining header according to the class */
 	if (ident[EI_CLASS] == ELFCLASS32)
 	{
 		Elf32_Ehdr h32;
