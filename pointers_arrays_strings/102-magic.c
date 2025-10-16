@@ -1,51 +1,59 @@
 #include "main.h"
-#include <stdio.h>
 
 /**
- * print_buffer - prints the content of a buffer
- * @b: pointer to the buffer
+ * print_buffer - prints a buffer’s content in hex + ASCII
+ * @b: pointer to buffer
  * @size: number of bytes to print
- *
- * Each line shows:
- * - the offset (8 hex chars)
- * - 10 bytes of hex (2 chars each), grouped in pairs, separated by a space
- * - the printable ASCII representation ('.' for non-printables)
- * If size <= 0, prints only a newline.
  */
 void print_buffer(char *b, int size)
 {
-	int i, j;
+	int i, j, k;
 
 	if (size <= 0)
 	{
-		printf("\n");
+		_putchar('\n');
 		return;
 	}
 
 	for (i = 0; i < size; i += 10)
 	{
-		printf("%08x: ", i);
+		/* print offset */
+		for (j = 28; j >= 0; j -= 4)
+			_putchar(((i >> j) & 0xF) + (((i >> j) & 0xF) < 10 ? '0' : 'a' - 10));
 
+		_putchar(':');
+		_putchar(' ');
+
+		/* print hex bytes */
 		for (j = 0; j < 10; j++)
 		{
 			if (j % 2 == 0 && j != 0)
-				printf(" ");
+				_putchar(' ');
 			if (i + j < size)
-				printf("%02x", (unsigned char)b[i + j]);
+			{
+				unsigned char c = b[i + j];
+				for (k = 4; k >= 0; k -= 4)
+					_putchar(((c >> k) & 0xF) + (((c >> k) & 0xF) < 10 ? '0' : 'a' - 10));
+			}
 			else
-				printf("  ");
+			{
+				_putchar(' ');
+				_putchar(' ');
+			}
 		}
 
-		printf(" ");
+		_putchar(' ');
 
+		/* print ASCII */
 		for (j = 0; j < 10 && i + j < size; j++)
 		{
-			unsigned char c = b[i + j];
+			char c = b[i + j];
 			if (c >= 32 && c <= 126)
-				printf("%c", c);
+				_putchar(c);
 			else
-				printf(".");
+				_putchar('.');
 		}
-		printf("\n");
+
+		_putchar('\n');
 	}
 }
