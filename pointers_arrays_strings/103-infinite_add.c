@@ -2,59 +2,51 @@
 
 /**
  * infinite_add - adds two numbers stored as strings
- * @n1: first number
- * @n2: second number
- * @r: buffer to store the result
- * @size_r: size of the buffer
+ * @n1: first number (string of digits)
+ * @n2: second number (string of digits)
+ * @r: buffer to store result
+ * @size_r: size of buffer r
  *
- * Return: pointer to the result (r), or 0 if the result can't fit
+ * Return: pointer to result inside r, or 0 if result can't fit
  */
 char *infinite_add(char *n1, char *n2, char *r, int size_r)
 {
-	int i = 0, j = 0, k, l, m, n;
+	int i = 0, j = 0, k, carry = 0, sum;
 
-	while (n1[i])
+	/* find lengths */
+	while (n1[i] != '\0')
 		i++;
-	while (n2[j])
+	while (n2[j] != '\0')
 		j++;
 
-	if (i > size_r || j > size_r)
+	/* r must have at least one char for '\0' */
+	if (size_r < 2)
 		return (0);
 
-	l = 0;
+	/* write from the end of r to avoid a separate reverse step */
+	k = size_r - 1;
+	r[k] = '\0';
+	k--;
+
 	i--;
 	j--;
-	m = 0;
 
-	while (i >= 0 || j >= 0 || m)
+	/* add from least significant digit to most significant */
+	while (i >= 0 || j >= 0 || carry)
 	{
-		n = m;
-		if (i >= 0)
-			n += n1[i--] - '0';
-		if (j >= 0)
-			n += n2[j--] - '0';
-
-		if (n > 9)
-		{
-			m = 1;
-			n -= 10;
-		}
-		else
-			m = 0;
-
-		if (l >= size_r - 1)
+		if (k < 0)              /* no more space in r */
 			return (0);
 
-		r[l++] = n + '0';
-	}
-	r[l] = '\0';
+		sum = carry;
+		if (i >= 0)
+			sum += n1[i--] - '0';
+		if (j >= 0)
+			sum += n2[j--] - '0';
 
-	for (k = 0; k < l / 2; k++)
-	{
-		char temp = r[k];
-		r[k] = r[l - 1 - k];
-		r[l - 1 - k] = temp;
+		r[k--] = (sum % 10) + '0';
+		carry = sum / 10;
 	}
 
-	return (r);
+	/* result starts at r[k + 1] */
+	return (r + k + 1);
 }
