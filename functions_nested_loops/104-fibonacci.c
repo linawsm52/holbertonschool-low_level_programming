@@ -1,50 +1,55 @@
 #include <stdio.h>
 
 /**
- * main - prints the first 98 Fibonacci numbers, starting with 1 and 2
+ * main - Prints the first 98 Fibonacci numbers, starting with 1 and 2.
+ *
+ * Description: The program prints the first 98 Fibonacci numbers
+ * without using arrays, pointers, or long double types.
+ * Large numbers are handled by splitting them into two parts
+ * (the high and low segments).
+ *
  * Return: Always 0 (Success)
  */
 int main(void)
 {
-	unsigned long int i, j, k;
-	unsigned long int i1, i2, j1, j2, k1, k2;
+	unsigned long int a = 1, b = 2, c;
+	unsigned long int a1, a2, b1, b2, c1, c2;
+	int i;
 
-	i = 1;
-	j = 2;
+	/* Print the first two numbers */
+	printf("%lu, %lu", a, b);
 
-	for (k = 1; k <= 91; k++)
+	/* Print Fibonacci numbers up to the 92nd value */
+	for (i = 3; i <= 92; i++)
 	{
-		printf("%lu, ", i);
-		j = j + i;
-		i = j - i;
+		c = a + b;
+		printf(", %lu", c);
+		a = b;
+		b = c;
 	}
 
-	i1 = i / 1000000000;
-	i2 = i % 1000000000;
-	j1 = j / 1000000000;
-	j2 = j % 1000000000;
+	/* Split the large numbers into two parts (high and low) */
+	a1 = a / 10000000000;
+	a2 = a % 10000000000;
+	b1 = b / 10000000000;
+	b2 = b % 10000000000;
 
-	for (; k <= 98; k++)
+	/* Print the remaining numbers up to the 98th Fibonacci number */
+	for (i = 93; i <= 98; i++)
 	{
-		printf("%lu%09lu", j1, j2);
-		if (k != 98)
-			printf(", ");
-
-		k1 = i1 + j1;
-		k2 = i2 + j2;
-
-		if (k2 >= 1000000000)
+		c1 = a1 + b1;
+		c2 = a2 + b2;
+		if (c2 >= 10000000000)
 		{
-			k1 += 1;
-			k2 %= 1000000000;
+			c1 += 1;
+			c2 %= 10000000000;
 		}
-
-		i1 = j1;
-		i2 = j2;
-		j1 = k1;
-		j2 = k2;
+		printf(", %lu%010lu", c1, c2);
+		a1 = b1;
+		a2 = b2;
+		b1 = c1;
+		b2 = c2;
 	}
-
 	printf("\n");
 	return (0);
 }
