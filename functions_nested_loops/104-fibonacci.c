@@ -6,59 +6,46 @@
  */
 int main(void)
 {
-	unsigned long int a = 1, b = 2, next;
-	unsigned long int a1, a2, b1, b2, next1, next2;
-	int i;
+	unsigned long int i, j, k;
+	unsigned long int i1, i2, j1, j2, k1, k2;
 
-	printf("%lu, %lu", a, b);
+	i = 1;
+	j = 2;
 
-	for (i = 3; i <= 98; i++)
+	printf("%lu, %lu", i, j);
+
+	for (k = 3; k <= 98; k++)
 	{
-		if (a + b < 10000000000)
+		if (i + j < 10000000000)
 		{
-			next = a + b;
-			printf(", %lu", next);
-			a = b;
-			b = next;
+			printf(", %lu", i + j);
+			j = i + j;
+			i = j - i;
 		}
 		else
 		{
-			if (a < 10000000000)
+			i1 = i / 10000000000;
+			i2 = i % 10000000000;
+			j1 = j / 10000000000;
+			j2 = j % 10000000000;
+
+			k1 = i1 + j1;
+			k2 = i2 + j2;
+
+			if (k2 >= 10000000000)
 			{
-				a1 = 0;
-				a2 = a;
-			}
-			else
-			{
-				a1 = a / 10000000000;
-				a2 = a % 10000000000;
+				k1 += 1;
+				k2 %= 10000000000;
 			}
 
-			if (b < 10000000000)
-			{
-				b1 = 0;
-				b2 = b;
-			}
-			else
-			{
-				b1 = b / 10000000000;
-				b2 = b % 10000000000;
-			}
+			printf(", %lu%010lu", k1, k2);
 
-			next1 = a1 + b1;
-			next2 = a2 + b2;
-			if (next2 >= 10000000000)
-			{
-				next1 += 1;
-				next2 %= 10000000000;
-			}
-			printf(", %lu%010lu", next1, next2);
-			a1 = b1;
-			a2 = b2;
-			b1 = next1;
-			b2 = next2;
-			a = b;
-			b = 0;
+			i1 = j1;
+			i2 = j2;
+			j1 = k1;
+			j2 = k2;
+			i = 0;
+			j = 0;
 		}
 	}
 	printf("\n");
