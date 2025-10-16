@@ -9,18 +9,17 @@ int main(void)
 	unsigned long int i, j, k;
 	unsigned long int i1, i2, j1, j2, k1, k2;
 
-	i = 1;
-	j = 2;
+	i = 0;
+	j = 1;
 
-	printf("%lu, %lu", i, j);
-
-	for (k = 3; k <= 98; k++)
+	for (k = 1; k <= 98; k++)
 	{
-		if (i + j < 10000000000)
+		unsigned long int next;
+
+		next = i + j;
+		if (next < 10000000000)
 		{
-			printf(", %lu", i + j);
-			j = i + j;
-			i = j - i;
+			printf("%lu", next);
 		}
 		else
 		{
@@ -37,16 +36,18 @@ int main(void)
 				k1 += 1;
 				k2 %= 10000000000;
 			}
-
-			printf(", %lu%010lu", k1, k2);
+			printf("%lu%010lu", k1, k2);
 
 			i1 = j1;
 			i2 = j2;
 			j1 = k1;
 			j2 = k2;
-			i = 0;
-			j = 0;
 		}
+		i = j;
+		j = next;
+
+		if (k != 98)
+			printf(", ");
 	}
 	printf("\n");
 	return (0);
