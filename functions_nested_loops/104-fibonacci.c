@@ -6,8 +6,7 @@
  */
 int main(void)
 {
-	unsigned long int i, j, k;
-	unsigned long int i1, i2, j1, j2, k1, k2;
+	unsigned long int i, j, k, j1, j2, k1, k2;
 
 	i = 0;
 	j = 1;
@@ -23,29 +22,24 @@ int main(void)
 		}
 		else
 		{
-			i1 = i / 10000000000;
-			i2 = i % 10000000000;
-			j1 = j / 10000000000;
-			j2 = j % 10000000000;
+			j1 = i / 10000000000;
+			j2 = i % 10000000000;
+			k1 = j / 10000000000;
+			k2 = j % 10000000000;
 
-			k1 = i1 + j1;
-			k2 = i2 + j2;
+			j1 = j1 + k1;
+			j2 = j2 + k2;
 
-			if (k2 >= 10000000000)
+			if (j2 >= 10000000000)
 			{
-				k1 += 1;
-				k2 %= 10000000000;
+				j1++;
+				j2 %= 10000000000;
 			}
-			printf("%lu%010lu", k1, k2);
 
-			i1 = j1;
-			i2 = j2;
-			j1 = k1;
-			j2 = k2;
+			printf("%lu%010lu", j1, j2);
 		}
 		i = j;
 		j = next;
-
 		if (k != 98)
 			printf(", ");
 	}
