@@ -25,4 +25,7 @@ void print_chessboard(char (*a)[8]);
 void print_diagsums(int *a, int size);
 int _putchar(char c);
 char *rot13(char *s);
+void print_number(int n);
+int _putchar(char c);
+
 #endif /* MAIN_H */
