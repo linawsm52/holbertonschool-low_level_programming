@@ -3,9 +3,9 @@
 #include <time.h>
 
 /**
- * main - generates a valid random password for 101-crackme
+ * main - generate a valid key for 101-crackme
  *
- * Return: Always 0 (Success)
+ * Return: 0 on success
  */
 int main(void)
 {
@@ -13,14 +13,20 @@ int main(void)
 
 	srand(time(NULL));
 
+	/* print characters until the sum reaches 2772 */
 	while (sum < 2772)
 	{
-		ch = rand() % 128;
-		if ((sum + ch) > 2772)
-			break;
-		sum += ch;
+		/* pick a printable ASCII char (32..126) */
+		ch = (rand() % 95) + 32;
+
+		/* if adding ch would exceed 2772, set ch to the remaining difference */
+		if (sum + ch > 2772)
+			ch = 2772 - sum;
+
+		/* ch will never be 0 here, because sum < 2772 and ch >= 1 */
 		putchar(ch);
+		sum += ch;
 	}
-	putchar(2772 - sum);
+	/* do not print newline; do not print NUL */
 	return (0);
 }
