@@ -1,27 +1,24 @@
 #include "main.h"
 
 /**
- * rot13 - encodes a string using rot13
- * @s: string to encode
+ * rot13 - encodes a string using ROT13 (in place)
+ * @s: pointer to the string to encode
  *
- * Return: pointer to the encoded string (same buffer)
+ * Return: pointer to the same string (encoded)
  */
 char *rot13(char *s)
 {
-	char *p = s;
+	int i, j;
 	char from[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	char to[]   = "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm";
-	int i, j;
 
-	/* loop over each character in s */
-	for (; *p != '\0'; p++)
+	for (i = 0; s[i] != '\0'; i++)
 	{
-		/* loop over from[] to find a match */
-		for (i = 0; from[i] != '\0'; i++)
+		for (j = 0; from[j] != '\0'; j++)
 		{
-			if (*p == from[i]) /* only one if in the whole function */
+			if (s[i] == from[j]) /* <- only if in the whole function */
 			{
-				*p = to[i];
+				s[i] = to[j];
 				break;
 			}
 		}
