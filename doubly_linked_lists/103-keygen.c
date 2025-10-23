@@ -4,105 +4,75 @@
 #include <string.h>
 
 /**
- * gen_k0 - generate key[0] from length
- * @len: length of username
- * Return: value for key[0]
- */
-unsigned char gen_k0(unsigned int len)
-{
-	return (unsigned char)(((len ^ 59) & 63));
-}
-
-/**
- * gen_k1 - generate key[1] from sum of chars
+ * compute_first_three - compute key[0], key[1], key[2]
  * @s: username
- * @len: length
- * Return: value for key[1]
+ * @len: username length
+ * @key: array to fill (at least 6 bytes)
+ *
+ * This fills key[0..2] according to crackme5 algorithm.
  */
-unsigned char gen_k1(char *s, unsigned int len)
+void compute_first_three(char *s, unsigned int len, unsigned char key[6])
 {
-	unsigned long ch = 0;
+	unsigned long ch;
 	unsigned int i;
 
+	/* key[0] from length */
+	key[0] = (unsigned char)(((len ^ 59) & 63));
+
+	/* key[1] from sum of chars */
+	ch = 0UL;
 	for (i = 0; i < len; i++)
 		ch += (unsigned long)s[i];
+	key[1] = (unsigned char)(((ch ^ 79UL) & 63));
 
-	return (unsigned char)(((ch ^ 79UL) & 63));
-}
-
-/**
- * gen_k2 - generate key[2] from product of chars
- * @s: username
- * @len: length
- * Return: value for key[2]
- */
-unsigned char gen_k2(char *s, unsigned int len)
-{
-	unsigned long ch = 1;
-	unsigned int i;
-
+	/* key[2] from product of chars */
+	ch = 1UL;
 	for (i = 0; i < len; i++)
 		ch *= (unsigned long)s[i];
-
-	return (unsigned char)(((ch ^ 85UL) & 63));
+	key[2] = (unsigned char)(((ch ^ 85UL) & 63));
 }
 
 /**
- * gen_k3 - generate key[3] using max char and rand
+ * compute_last_three - compute key[3], key[4], key[5]
  * @s: username
- * @len: length
- * Return: value for key[3]
+ * @len: username length
+ * @key: array to fill (at least 6 bytes)
+ *
+ * This fills key[3..5] using max char, sum of squares and rand loop.
  */
-unsigned char gen_k3(char *s, unsigned int len)
+void compute_last_three(char *s, unsigned int len, unsigned char key[6])
 {
-	unsigned long ch = 0;
+	unsigned long ch;
 	unsigned int i;
 
+	/* key[3]: srand based on max char */
+	ch = 0UL;
 	for (i = 0; i < len; i++)
 		if ((unsigned long)s[i] > ch)
 			ch = (unsigned long)s[i];
 
 	srand((unsigned int)(ch ^ 14UL));
-	return (unsigned char)(rand() & 63);
-}
+	key[3] = (unsigned char)(rand() & 63);
 
-/**
- * gen_k4 - generate key[4] from sum of squares
- * @s: username
- * @len: length
- * Return: value for key[4]
- */
-unsigned char gen_k4(char *s, unsigned int len)
-{
-	unsigned long ch = 0;
-	unsigned int i;
-
+	/* key[4]: sum of squares */
+	ch = 0UL;
 	for (i = 0; i < len; i++)
 		ch += (unsigned long)(s[i] * s[i]);
+	key[4] = (unsigned char)(((ch ^ 239UL) & 63));
 
-	return (unsigned char)(((ch ^ 239UL) & 63));
-}
-
-/**
- * gen_k5 - generate key[5] from looping rand
- * @s: username
- * Return: value for key[5]
- */
-unsigned char gen_k5(char *s)
-{
-	unsigned long ch = 0;
-	unsigned int i;
-
+	/* key[5]: loop rand username[0] times */
+	ch = 0UL;
 	for (i = 0; i < (unsigned int)s[0]; i++)
 		ch = (unsigned long)rand();
-
-	return (unsigned char)(((ch ^ 229UL) & 63));
+	key[5] = (unsigned char)(((ch ^ 229UL) & 63));
 }
 
 /**
- * print_key - print 6-byte key using ops table
- * @key: key array
- * @ops: ops table (8 * 8 bytes = 64 bytes)
+ * print_key - print 6-byte key using the ops table
+ * @key: key array (6 bytes)
+ * @ops: table with 8 unsigned long values (8 * 8 = 64 bytes)
+ *
+ * This reinterprets ops as a byte array and indexes it by key values.
  */
 void print_key(unsigned char key[6], unsigned long ops[8])
 {
@@ -115,8 +85,8 @@ void print_key(unsigned char key[6], unsigned long ops[8])
 
 /**
  * main - generate key for crackme5 username
- * @argc: arg count
- * @argv: arg vector
+ * @argc: number of arguments
+ * @argv: argument vector
  * Return: 0 on success, 1 on usage error
  */
 int main(int argc, char *argv[])
@@ -140,13 +110,8 @@ int main(int argc, char *argv[])
 	username = argv[1];
 	len = (unsigned int)strlen(username);
 
-	key[0] = gen_k0(len);
-	key[1] = gen_k1(username, len);
-	key[2] = gen_k2(username, len);
-	key[3] = gen_k3(username, len);
-	key[4] = gen_k4(username, len);
-	key[5] = gen_k5(username);
-
+	compute_first_three(username, len, key);
+	compute_last_three(username, len, key);
 	print_key(key, ops);
 
 	return (0);
