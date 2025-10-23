@@ -5,8 +5,8 @@
 #include <unistd.h>
 
 /**
- * print_error - Prints an error message and exits with status 98.
- * @msg: The error message to print.
+ * print_error - Prints an error message and exits with status 98
+ * @msg: The error message to print
  */
 void print_error(char *msg)
 {
@@ -20,9 +20,9 @@ void print_error(char *msg)
 }
 
 /**
- * rev16 - Reverses a 16-bit value (used for big endian files)
+ * rev16 - Reverses a 16-bit value for big endian
  * @val: The value to reverse
- * Return: The reversed value
+ * Return: Reversed value
  */
 unsigned short rev16(unsigned short val)
 {
@@ -30,22 +30,27 @@ unsigned short rev16(unsigned short val)
 }
 
 /**
- * rev64 - Reverses a 64-bit value (used for big endian files)
+ * rev64 - Reverses bytes of an unsigned long for big endian
  * @val: The value to reverse
- * Return: The reversed value
+ * Return: Reversed value
  */
 unsigned long rev64(unsigned long val)
 {
-	val = ((val << 8) & 0xFF00FF00FF00FF00ULL) |
-	      ((val >> 8) & 0x00FF00FF00FF00FFULL);
-	val = ((val << 16) & 0xFFFF0000FFFF0000ULL) |
-	      ((val >> 16) & 0x0000FFFF0000FFFFULL);
-	return (val << 32) | (val >> 32);
+	unsigned long res = 0;
+	int i;
+
+	for (i = 0; i < 8; i++)
+	{
+		res <<= 8;
+		res |= (val & 0xFF);
+		val >>= 8;
+	}
+	return (res);
 }
 
 /**
- * print_magic - Prints ELF magic bytes
- * @e_ident: The ELF identification array
+ * print_magic - Prints ELF magic numbers
+ * @e_ident: ELF identification array
  */
 void print_magic(unsigned char *e_ident)
 {
@@ -63,7 +68,7 @@ void print_magic(unsigned char *e_ident)
 
 /**
  * print_class - Prints ELF class
- * @e_ident: The ELF identification array
+ * @e_ident: ELF identification array
  */
 void print_class(unsigned char *e_ident)
 {
@@ -86,7 +91,7 @@ void print_class(unsigned char *e_ident)
 
 /**
  * print_data - Prints ELF data encoding
- * @e_ident: The ELF identification array
+ * @e_ident: ELF identification array
  */
 void print_data(unsigned char *e_ident)
 {
@@ -109,7 +114,7 @@ void print_data(unsigned char *e_ident)
 
 /**
  * print_version - Prints ELF version
- * @e_ident: The ELF identification array
+ * @e_ident: ELF identification array
  */
 void print_version(unsigned char *e_ident)
 {
@@ -121,7 +126,7 @@ void print_version(unsigned char *e_ident)
 
 /**
  * print_osabi - Prints ELF OS/ABI
- * @e_ident: The ELF identification array
+ * @e_ident: ELF identification array
  */
 void print_osabi(unsigned char *e_ident)
 {
@@ -147,7 +152,7 @@ void print_osabi(unsigned char *e_ident)
 
 /**
  * print_abi_version - Prints ABI version
- * @e_ident: The ELF identification array
+ * @e_ident: ELF identification array
  */
 void print_abi_version(unsigned char *e_ident)
 {
@@ -156,8 +161,8 @@ void print_abi_version(unsigned char *e_ident)
 
 /**
  * print_type - Prints ELF type
- * @type: The ELF file type
- * @e_ident: The ELF identification array
+ * @type: The ELF type
+ * @e_ident: ELF identification array
  */
 void print_type(unsigned short type, unsigned char *e_ident)
 {
@@ -188,20 +193,19 @@ void print_type(unsigned short type, unsigned char *e_ident)
 }
 
 /**
- * print_entry - Prints the entry point address
- * @entry: The entry point value
- * @e_ident: The ELF identification array
+ * print_entry - Prints entry point address
+ * @entry: The entry point address
+ * @e_ident: ELF identification array
  */
 void print_entry(unsigned long entry, unsigned char *e_ident)
 {
 	if (e_ident[EI_DATA] == ELFDATA2MSB)
 		entry = rev64(entry);
-
 	printf("  Entry point address:               %#lx\n", entry);
 }
 
 /**
- * main - Displays information contained in the ELF header
+ * main - Displays information from ELF header
  * @argc: Argument count
  * @argv: Argument vector
  * Return: 0 on success, 98 on failure
