@@ -33,9 +33,9 @@ typedef struct hash_table_s
  * struct shash_node_s - Node of a sorted hash table
  * @key: The key
  * @value: The value
- * @next: Pointer to next node in the same index
- * @sprev: Pointer to previous element in sorted list
- * @snext: Pointer to next element in sorted list
+ * @next: Pointer to next node in collision list
+ * @sprev: Pointer to previous sorted node
+ * @snext: Pointer to next sorted node
  */
 typedef struct shash_node_s
 {
@@ -47,11 +47,11 @@ typedef struct shash_node_s
 } shash_node_t;
 
 /**
- * struct shash_table_s - Sorted hash table
+ * struct shash_table_s - Sorted hash table structure
  * @size: The size of the array
- * @array: An array of size @size
- * @shead: Pointer to first element in sorted list
- * @stail: Pointer to last element in sorted list
+ * @array: Array of size @size
+ * @shead: Pointer to first element in sorted order
+ * @stail: Pointer to last element in sorted order
  */
 typedef struct shash_table_s
 {
@@ -61,7 +61,7 @@ typedef struct shash_table_s
 	shash_node_t *stail;
 } shash_table_t;
 
-/* Base Hash Table */
+/* Regular hash table */
 hash_table_t *hash_table_create(unsigned long int size);
 unsigned long int hash_djb2(const unsigned char *str);
 unsigned long int key_index(const unsigned char *key, unsigned long int size);
@@ -70,7 +70,7 @@ char *hash_table_get(const hash_table_t *ht, const char *key);
 void hash_table_print(const hash_table_t *ht);
 void hash_table_delete(hash_table_t *ht);
 
-/* Sorted Hash Table */
+/* Sorted hash table */
 shash_table_t *shash_table_create(unsigned long int size);
 int shash_table_set(shash_table_t *ht, const char *key, const char *value);
 char *shash_table_get(const shash_table_t *ht, const char *key);
