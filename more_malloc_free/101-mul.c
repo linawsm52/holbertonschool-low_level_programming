@@ -35,7 +35,7 @@ int _strlen(char *s)
 }
 
 /**
- * errors - prints "Error" and exits
+ * errors - prints "Error" and exits with status 98
  */
 void errors(void)
 {
@@ -89,6 +89,9 @@ int main(int argc, char *argv[])
 
 	while (a < len - 1 && result[a] == 0)
 		a++;
+
+	if (a == len - 1)
+		printf("0");
 
 	for (; a < len - 1; a++)
 		printf("%d", result[a]);
