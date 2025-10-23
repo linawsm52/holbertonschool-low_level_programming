@@ -1,14 +1,59 @@
+/* 103-keygen.c */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 /**
- * f4 - finds max char and returns randomized value
- * @s: username
+ * gen_k0 - generate key[0] from length
  * @len: length of username
- * Return: char for key[3]
+ * Return: value for key[0]
  */
-char f4(char *s, unsigned int len)
+unsigned char gen_k0(unsigned int len)
+{
+	return (unsigned char)(((len ^ 59) & 63));
+}
+
+/**
+ * gen_k1 - generate key[1] from sum of chars
+ * @s: username
+ * @len: length
+ * Return: value for key[1]
+ */
+unsigned char gen_k1(char *s, unsigned int len)
+{
+	unsigned long ch = 0;
+	unsigned int i;
+
+	for (i = 0; i < len; i++)
+		ch += (unsigned long)s[i];
+
+	return (unsigned char)(((ch ^ 79UL) & 63));
+}
+
+/**
+ * gen_k2 - generate key[2] from product of chars
+ * @s: username
+ * @len: length
+ * Return: value for key[2]
+ */
+unsigned char gen_k2(char *s, unsigned int len)
+{
+	unsigned long ch = 1;
+	unsigned int i;
+
+	for (i = 0; i < len; i++)
+		ch *= (unsigned long)s[i];
+
+	return (unsigned char)(((ch ^ 85UL) & 63));
+}
+
+/**
+ * gen_k3 - generate key[3] using max char and rand
+ * @s: username
+ * @len: length
+ * Return: value for key[3]
+ */
+unsigned char gen_k3(char *s, unsigned int len)
 {
 	unsigned long ch = 0;
 	unsigned int i;
@@ -16,54 +61,70 @@ char f4(char *s, unsigned int len)
 	for (i = 0; i < len; i++)
 		if ((unsigned long)s[i] > ch)
 			ch = (unsigned long)s[i];
+
 	srand((unsigned int)(ch ^ 14UL));
-	return ((char)(rand() & 63));
+	return (unsigned char)(rand() & 63);
 }
 
 /**
- * f5 - computes sum of squares
+ * gen_k4 - generate key[4] from sum of squares
  * @s: username
  * @len: length
- * Return: char for key[4]
+ * Return: value for key[4]
  */
-char f5(char *s, unsigned int len)
+unsigned char gen_k4(char *s, unsigned int len)
 {
 	unsigned long ch = 0;
 	unsigned int i;
 
 	for (i = 0; i < len; i++)
 		ch += (unsigned long)(s[i] * s[i]);
-	return ((char)((ch ^ 239UL) & 63));
+
+	return (unsigned char)(((ch ^ 239UL) & 63));
 }
 
 /**
- * f6 - random looped value
+ * gen_k5 - generate key[5] from looping rand
  * @s: username
- * Return: char for key[5]
+ * Return: value for key[5]
  */
-char f6(char *s)
+unsigned char gen_k5(char *s)
 {
 	unsigned long ch = 0;
 	unsigned int i;
 
 	for (i = 0; i < (unsigned int)s[0]; i++)
 		ch = (unsigned long)rand();
-	return ((char)((ch ^ 229UL) & 63));
+
+	return (unsigned char)(((ch ^ 229UL) & 63));
 }
 
 /**
- * main - generates a valid key for crackme5
- * @argc: argument count
- * @argv: argument vector
- * Return: 0 on success, 1 if usage error
+ * print_key - print 6-byte key using ops table
+ * @key: key array
+ * @ops: ops table (8 * 8 bytes = 64 bytes)
+ */
+void print_key(unsigned char key[6], unsigned long ops[8])
+{
+	unsigned int i;
+
+	for (i = 0; i < 6; i++)
+		putchar(((char *)ops)[(unsigned int)key[i]]);
+	putchar('\n');
+}
+
+/**
+ * main - generate key for crackme5 username
+ * @argc: arg count
+ * @argv: arg vector
+ * Return: 0 on success, 1 on usage error
  */
 int main(int argc, char *argv[])
 {
-	unsigned int i, len;
-	unsigned long ch;
+	unsigned int len;
 	char *username;
-	char key[7];
-	unsigned long ops[] = {
+	unsigned char key[6];
+	unsigned long ops[8] = {
 		0x3877445248432d41UL, 0x42394530534e6c37UL,
 		0x4d6e706762695432UL, 0x74767a5835737956UL,
 		0x2b554c59634a474fUL, 0x71786636576a6d34UL,
@@ -79,25 +140,14 @@ int main(int argc, char *argv[])
 	username = argv[1];
 	len = (unsigned int)strlen(username);
 
-	key[0] = (char)(((len ^ 59) & 63));
+	key[0] = gen_k0(len);
+	key[1] = gen_k1(username, len);
+	key[2] = gen_k2(username, len);
+	key[3] = gen_k3(username, len);
+	key[4] = gen_k4(username, len);
+	key[5] = gen_k5(username);
 
-	ch = 0UL;
-	for (i = 0; i < len; i++)
-		ch += (unsigned long)username[i];
-	key[1] = (char)(((ch ^ 79UL) & 63));
-
-	ch = 1UL;
-	for (i = 0; i < len; i++)
-		ch *= (unsigned long)username[i];
-	key[2] = (char)(((ch ^ 85UL) & 63));
-
-	key[3] = f4(username, len);
-	key[4] = f5(username, len);
-	key[5] = f6(username);
-
-	for (i = 0; i < 6; i++)
-		putchar(((char *)ops)[(unsigned int)key[i]]);
-	putchar('\n');
+	print_key(key, ops);
 
 	return (0);
 }
