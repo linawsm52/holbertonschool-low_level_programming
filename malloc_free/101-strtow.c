@@ -25,6 +25,26 @@ int count_words(char *str)
 }
 
 /**
+ * copy_word - copies a single word from a string
+ * @str: pointer to start of word
+ * @len: word length
+ * Return: pointer to new word (malloc'd)
+ */
+char *copy_word(char *str, int len)
+{
+	char *word;
+	int i;
+
+	word = malloc(sizeof(char) * (len + 1));
+	if (word == NULL)
+		return (NULL);
+	for (i = 0; i < len; i++)
+		word[i] = str[i];
+	word[i] = '\0';
+	return (word);
+}
+
+/**
  * strtow - splits a string into words
  * @str: string to split
  * Return: pointer to an array of strings (words), or NULL on failure
@@ -32,7 +52,7 @@ int count_words(char *str)
 char **strtow(char *str)
 {
 	char **words;
-	int i, j, k, len, word_count, start;
+	int i = 0, k = 0, len, word_count, start;
 
 	if (str == NULL || *str == '\0')
 		return (NULL);
@@ -45,19 +65,19 @@ char **strtow(char *str)
 	if (words == NULL)
 		return (NULL);
 
-	i = 0, k = 0;
 	while (str[i])
 	{
 		while (str[i] == ' ')
 			i++;
 		if (str[i] == '\0')
 			break;
+
 		start = i;
 		while (str[i] != ' ' && str[i] != '\0')
 			i++;
 		len = i - start;
 
-		words[k] = malloc(sizeof(char) * (len + 1));
+		words[k] = copy_word(str + start, len);
 		if (words[k] == NULL)
 		{
 			while (k--)
@@ -65,9 +85,6 @@ char **strtow(char *str)
 			free(words);
 			return (NULL);
 		}
-		for (j = 0; j < len; j++)
-			words[k][j] = str[start + j];
-		words[k][j] = '\0';
 		k++;
 	}
 	words[k] = NULL;
