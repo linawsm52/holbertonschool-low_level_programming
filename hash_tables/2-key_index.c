@@ -10,14 +10,11 @@
  */
 unsigned long int key_index(const unsigned char *key, unsigned long int size)
 {
-    unsigned long int hash_value;
+	unsigned long int hash_value;
 
-    if (key == NULL || size == 0)
-        return (0);
+	if (key == NULL || size == 0)
+		return (0);
 
-    /* Use the djb2 algorithm to get hash value */
-    hash_value = hash_djb2(key);
-
-    /* Return index within table size */
-    return (hash_value % size);
+	hash_value = hash_djb2(key);
+	return (hash_value % size);
 }
