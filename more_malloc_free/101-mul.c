@@ -5,7 +5,7 @@
 /**
  * _isdigit - checks if a string contains only digits
  * @s: string to check
- * Return: 1 if all digits, 0 otherwise
+ * Return: 1 if all are digits, 0 otherwise
  */
 int _isdigit(char *s)
 {
@@ -52,12 +52,14 @@ void errors(void)
 int main(int argc, char *argv[])
 {
 	char *num1, *num2;
-	int len1, len2, len, i, carry, n1, n2, *result, a = 0;
+	int len1, len2, len, i, carry, n1, n2, *result, start = 0;
 
 	if (argc != 3)
 		errors();
 
-	num1 = argv[1], num2 = argv[2];
+	num1 = argv[1];
+	num2 = argv[2];
+
 	if (!_isdigit(num1) || !_isdigit(num2))
 		errors();
 
@@ -87,14 +89,19 @@ int main(int argc, char *argv[])
 			result[len1 + len2 + 1] += carry;
 	}
 
-	while (a < len - 1 && result[a] == 0)
-		a++;
+	while (start < len - 1 && result[start] == 0)
+		start++;
 
-	if (a == len - 1)
-		printf("0");
+	/* handle zero result */
+	if (start == len - 1)
+	{
+		printf("0\n");
+		free(result);
+		return (0);
+	}
 
-	for (; a < len - 1; a++)
-		printf("%d", result[a]);
+	for (; start < len - 1; start++)
+		printf("%d", result[start]);
 	printf("\n");
 
 	free(result);
