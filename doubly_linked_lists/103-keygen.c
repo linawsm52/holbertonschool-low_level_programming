@@ -12,13 +12,9 @@
 int main(int argc, char *argv[])
 {
 	unsigned int i, len;
-	unsigned long long ch;
+	unsigned long ch;
 	char *username;
 	char key[7];
-	/*
-	 * ops contains 8 * 8 bytes = 64 chars when interpreted as bytes.
-	 * Use unsigned long (with UL suffix) to store these 64-bit constants.
-	 */
 	unsigned long ops[] = {
 		0x3877445248432d41UL,
 		0x42394530534e6c37UL,
@@ -37,39 +33,39 @@ int main(int argc, char *argv[])
 	}
 
 	username = argv[1];
-	len = (unsigned int)strlen(username);
+	len = (unsigned int) strlen(username);
 
-	key[0] = ((len ^ 59) & 63);
+	key[0] = (char)(((len ^ 59) & 63));
 
-	ch = 0;
+	ch = 0UL;
 	for (i = 0; i < len; i++)
-		ch += username[i];
-	key[1] = ((ch ^ 79) & 63);
+		ch += (unsigned long)username[i];
+	key[1] = (char)(((ch ^ 79UL) & 63));
 
-	ch = 1;
+	ch = 1UL;
 	for (i = 0; i < len; i++)
-		ch *= username[i];
-	key[2] = ((ch ^ 85) & 63);
+		ch *= (unsigned long)username[i];
+	key[2] = (char)(((ch ^ 85UL) & 63));
 
-	ch = 0;
+	ch = 0UL;
 	for (i = 0; i < len; i++)
-		if ((unsigned long long)username[i] > ch)
-			ch = username[i];
-	srand((unsigned int)(ch ^ 14));
-	key[3] = (rand() & 63);
+		if ((unsigned long)username[i] > ch)
+			ch = (unsigned long)username[i];
+	srand((unsigned int)(ch ^ 14UL));
+	key[3] = (char)(rand() & 63);
 
-	ch = 0;
+	ch = 0UL;
 	for (i = 0; i < len; i++)
-		ch += (username[i] * username[i]);
-	key[4] = ((ch ^ 239) & 63);
+		ch += (unsigned long)(username[i] * username[i]);
+	key[4] = (char)(((ch ^ 239UL) & 63));
 
 	for (i = 0; i < (unsigned int)username[0]; i++)
-		ch = rand();
-	key[5] = ((ch ^ 229) & 63);
+		ch = (unsigned long)rand();
+	key[5] = (char)(((ch ^ 229UL) & 63));
 
-	/* print the 6 chars by indexing the bytes of ops */
+	/* print the 6 characters by indexing the bytes of ops */
 	for (i = 0; i < 6; i++)
-		putchar(((char *)ops)[key[i]]);
+		putchar(((char *)ops)[(unsigned int) key[i]]);
 	putchar('\n');
 
 	return (0);
